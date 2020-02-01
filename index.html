@@ -240,6 +240,267 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/01/extract-sum/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="chancy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NLPppprogress!!">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/02/01/extract-sum/" itemprop="url">extract-sum</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-01T10:56:08+08:00">
+                2020-02-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="抽取式文本摘要"><a href="#抽取式文本摘要" class="headerlink" title="抽取式文本摘要"></a>抽取式文本摘要</h1><hr>
+<p>title: extract_sum<br>date: 2020-02-01 10:56:08<br>tags:</p>
+<hr>
+<p>抽取式方法是一种直接从原文中选择若干条重要的句子，并对它们进行排序和重组而形成摘要的方法。通常而言，抽取式方法可以分为两大类：无监督抽取式方法和有监督抽取式方法</p>
+<ol>
+<li><p>常用数据集：<br>DUC-2001~2007 (<a href="http://www-nlpir.nist.gov/projects/duc/data.html" target="_blank" rel="noopener">http://www-nlpir.nist.gov/projects/duc/data.html</a>)<br>TAC-2008~2015 (<a href="http://tac.nist.gov/data/" target="_blank" rel="noopener">http://tac.nist.gov/data/</a>)<br>Gigawords (<a href="https://catalog.ldc.upenn.edu/LDC2012T21" target="_blank" rel="noopener">https://catalog.ldc.upenn.edu/LDC2012T21</a>)<br>LCSTS (<a href="http://icrc.hitsz.edu.cn/Article/show/139.html" target="_blank" rel="noopener">http://icrc.hitsz.edu.cn/Article/show/139.html</a>)<br>CNN/DailyMail (<a href="https://cs.nyu.edu/~kcho/DMQA/" target="_blank" rel="noopener">https://cs.nyu.edu/~kcho/DMQA/</a>)</p>
+</li>
+<li><p>评价指标：<br>ROUGE-1, Rouge-2, ROUGE-SU4, ROUGE-L</p>
+</li>
+<li><p>无监督方法<br>无监督抽取式方法大多是基于统计层面的，即最大化摘要句子对原始文档的表征能力。在这些方法中，最为著名的是TextRank<br>如何衡量句子的重要性呢？一个经典的方法就是<strong>tf-idf</strong><br>词频 (term frequency, TF)指的是某一个给定的词语在该文件中出现的次数。这个数字通常会被归一化(一般是词频除以文章总词数)<br>$$TF_w = \frac{在某文章w出现的次数}{文档所有词条个数}$$<br>逆向文件频率 (inverse document frequency, IDF) IDF的主要思想是：如果包含词条w的文档越少, IDF越大，则说明词条具有很好的类别区分能力。某一特定词语的IDF，可以由总文件数目除以包含该词语之文件的数目，再将得到的商取对数得到。<br>$$ IDF=log(\frac{语料库的文档总数}{包含词条w的文档数+1})$$<br>$TF−IDF=TF∗IDF$<br>那么如何计算句子的权重呢，直观的想法句子的权重就是各个词权重之和。</p>
+</li>
+</ol>
+<p>最新的一个工作是 PACSUM (ACL2019)<a href="https://github.com/mswellhao/PacSum" target="_blank" rel="noopener">https://github.com/mswellhao/PacSum</a> 这篇论文的整体框架是基于TextRank，Centroid等传统的基于图的摘要方法，但是有两方面的创新：<br>    * 在句子表示中引入了BERT模型来捕获句子的深层语义信息<br>    * 图网络中使用位置信息来判断句子之间的指向关系，从而将传统的无向图转换成有向图，提高模型准确率</p>
+<blockquote>
+<p>补充：tf-idf余弦相似性<br>基本思路是：如果这两句话的用词越相似，它们的内容就应该越相似。因此，可以从词频入手，计算它们的相似程度。<br>（1）使用TF-IDF算法，找出两篇文章的关键词；<br> （2）每篇文章各取出若干个关键词（比如20个），合并成一个集合，计算每篇文章对于这个集合中的词的词频（为了避免文章长度的差异，可以使用相对词频）；<br> （3）生成两篇文章各自的词频向量；<br> （4）计算两个向量的余弦相似度，值越大就表示越相似。</p>
+</blockquote>
+<ol start="4">
+<li>有监督方法<br> 一个非常紧迫的问题是我们如何提取监督信号？ 一个方法是使用贪心算法，从文档中选择句子和gloden计算一个最大的ROURGE得分，抽取出一个集合。1 标记为选中的，0标记为未选的。然后就变成了一个句子级别的二分类任务。<br>有监督的论文比较多：</li>
+<li>PGN(See et al., 2017) ,Pointer Generator Network, an abstractive summarization system based on an encoder-decoder architecture(<a href="https://arxiv.org/pdf/1704.04368.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1704.04368.pdf</a>)</li>
+<li>NEUSUM(Zhou et al., 2018) is the state-ofthe-art extractive system that jontly score and<br>select sentences(<a href="https://www.aclweb.org/anthology/P18-1061/" target="_blank" rel="noopener">https://www.aclweb.org/anthology/P18-1061/</a>)</li>
+<li>REFRESH (Narayan et al., 2018) is an extractive summarization system trained by globally optimizing the ROUGE metric with reinforcement learning(<a href="https://www.aclweb.org/anthology/N18-1158/" target="_blank" rel="noopener">https://www.aclweb.org/anthology/N18-1158/</a>)</li>
+<li>DCA (Celikyilmaz et al., 2018) is the Deep<br>Communicating Agents, a state-of-the-art abstractive summarization system with multiple agents to represent the document as well as hierarchical attention mechanism over the agents for decoding.(<a href="https://www.aclweb.org/anthology/N18-1150/" target="_blank" rel="noopener">https://www.aclweb.org/anthology/N18-1150/</a>)</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/15/citation-summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="chancy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NLPppprogress!!">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/01/15/citation-summary/" itemprop="url">citation summary</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-15T01:31:17+08:00">
+                2020-01-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/13/pytorch-broadcast/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -679,7 +940,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
